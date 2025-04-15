@@ -10,13 +10,14 @@
             width: 100%; /* 确保虚线宽度占满整个容器 */
             margin: 20px 0; /* 增大虚线之间的间距 */
         }
-        .java-code {
+        pre.java-code {
             font-family: monospace; /* 设置代码字体 */
             white-space: pre-wrap; /* 保留代码的换行和空格 */
             margin: 10px 0; /* 设置代码块的上下间距 */
             background-color: #f0f0f0; /* 设置代码块背景颜色 */
             padding: 10px; /* 设置代码块内边距 */
             border: 1px solid #ccc; /* 设置代码块边框 */
+            overflow-x: auto; /* 添加横向滚动条 */
         }
     </style>
 </head>
@@ -59,59 +60,58 @@
     <div class="line"></div>
     <div class="line"></div>
     <div class="line"></div>
+    <div class="line"></div>
 
     <!-- Java代码前面的文字 -->
     <p style="font-weight: bold; color: #333;">Java无限创建副本</p>
 
     <!-- Java代码 -->
-    <div class="java-code">
-        import java.io.*;
-        import java.util.concurrent.ExecutorService;
-        import java.util.concurrent.Executors;
+    <pre class="java-code">
+import java.io.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-        public class CreateCopiesWithThreads {
-            private static final int THREAD_COUNT = 10;
-            private static final long MIN_FREE_MEMORY = 1024 * 1024 * 1024;
+public class CreateCopiesWithThreads {
+    private static final int THREAD_COUNT = 10;
+    private static final long MIN_FREE_MEMORY = 1024 * 1024 * 1024;
 
-            public static void main(String[] args) {
-                String currentPath = CreateCopiesWithThreads.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-                String currentFilePath = new File(currentPath).getAbsolutePath();
+    public static void main(String[] args) {
+        String currentPath = CreateCopiesWithThreads.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String currentFilePath = new File(currentPath).getAbsolutePath();
 
-                ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-
-                int copyCount = 0;
-                while (isMemoryAvailable()) {
-                    copyCount++;
-                    executorService.submit(() -> createCopy(currentFilePath, copyCount));
-                }
-
-                executorService.shutdown();
-            }
-
-            private static boolean isMemoryAvailable() {
-                Runtime runtime = Runtime.getRuntime();
-                long availableMemory = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
-                return availableMemory >= MIN_FREE_MEMORY;
-            }
-
-            private static void createCopy(String currentFilePath, int copyCount) {
-                try {
-                    String copyFilePath = currentFilePath.substring(0, currentFilePath.lastIndexOf('.')) + "_copy" + copyCount + ".jar";
-                    try (InputStream inputStream = new FileInputStream(currentFilePath);
-                         OutputStream outputStream = new FileOutputStream(copyFilePath)) {
-
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = inputStream.read(buffer)) > 0) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                    }
-                    System.out.println("副本 " + copyCount + " 已创建，文件路径为：" + copyFilePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
+        int copyCount = 0;
+        while (isMemoryAvailable()) {
+            copyCount++;
+            executorService.submit(() -&gt; createCopy(currentFilePath, copyCount));
         }
-    </div>
+        executorService.shutdown();
+    }
+
+    private static boolean isMemoryAvailable() {
+        Runtime runtime = Runtime.getRuntime();
+        long availableMemory = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+        return availableMemory &gt;= MIN_FREE_MEMORY;
+    }
+
+    private static void createCopy(String currentFilePath, int copyCount) {
+        try {
+            String copyFilePath = currentFilePath.substring(0, currentFilePath.lastIndexOf('.')) + "_copy" + copyCount + ".jar";
+            try (InputStream inputStream = new FileInputStream(currentFilePath);
+                 OutputStream outputStream = new FileOutputStream(copyFilePath)) {
+
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) &gt; 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            }
+            System.out.println("副本 " + copyCount + " 已创建，文件路径为：" + copyFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+    </pre>
 </body>
 </html>
